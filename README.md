@@ -6,29 +6,6 @@ Dissecting the functions and the mechanisms of intracellular phase separation re
 
 ![figs/overview.jpg](https://github.com/jsun9003/PSPHunter/blob/main/figs/overview.jpg)
 
-# Preprocessing of scCARE-seq datasets
-
-#### Please have the following softwares installed first:
-- bowtie2, http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
-- samtools, http://www.htslib.org/
-   samtools version >= 1.3.1 is required.
-- Trim_galore, https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/
-- STAR, https://github.com/alexdobin/STAR
-- Higashi, https://github.com/ma-compbio/Higashi
-- sci-CAR, https://github.com/JunyueC/sci-CAR_analysis
-
-- Optional: FastQC, https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-
-# Additional Tutorial
-- [Higashi-analysis for HiC (Zhang et al.Nature biotechnology, 2022)](https://github.com/ma-compbio/Higashi)
-- [sci-CAR_analysis for RNA (Cao et al.Science, 2018)](https://github.com/JunyueC/sci-CAR_analysis)
-
-# Analysis of scCARE-seq datasets include the following steps:
-## 1. Split scCARE-seq data into HiC partion and RNA partion
-
-## 2. Single cell HiC analysis for the HiC partion
-
-## 3. Single cell RNA-seq analysis for the RNA partion
 
 # Cite
 
