@@ -25,6 +25,10 @@ Cite our paper by
 
 
 
+# Availability
+
+http://psphunter.stemcellding.org  
+
 # Contact
 
 Please contact o.sj@live.com or raise an issue in the github repo with any questions about installation or usage. 
