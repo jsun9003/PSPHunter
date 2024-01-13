@@ -33,7 +33,6 @@
 
 ## Availability
 <div style="text-align: justify">We have developed a user-friendly website, accessible at http://psphunter.stemcellding.org/, to facilitate the use of PSPHunter. This platform enables the prediction of phase-separating proteins and their driving regions using only protein sequences as input. By offering the capability to assess the impact of mutations on phase separation, our users can promptly identify mutations that disrupt normal phase separation functions.</div> 
-http://psphunter.stemcellding.org  
 
 ## Cite
 
