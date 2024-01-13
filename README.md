@@ -26,6 +26,7 @@
 ## Generate the features
 - Code for generating all features is located in scripts/featureExtraction, encompassing both sequence and functional features. The merged output can be used for model training.
 
+##We will demonstrate the usage of PSPHunter using its word2vec sub-model (The complete model is stored in the 'trained model' folder.)
 ## Demonstration of phase separation Probability Prediction
 `cd Test`
 
@@ -40,6 +41,7 @@
 `cd Test`
 
 `perl scripts/Standalone/predict_MutationEffect.pl Test`
+
 
 ## Availability
 <div style="text-align: justify">We have developed a user-friendly website, accessible at http://psphunter.stemcellding.org/, to facilitate the use of PSPHunter. This platform enables the prediction of phase-separating proteins and their driving regions using only protein sequences as input. By offering the capability to assess the impact of mutations on phase separation, our users can promptly identify mutations that disrupt normal phase separation functions.</div> 
