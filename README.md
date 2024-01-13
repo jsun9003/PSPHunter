@@ -6,7 +6,7 @@
 
 ![figs/overview.jpg](https://github.com/jsun9003/PSPHunter/blob/main/figs/overview.jpg)
 
-# To generate the ensential features
+## To generate the ensential features
 
 #### Please have the following softwares installed first:
 - psiblast for PSSM, https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
@@ -15,24 +15,24 @@
 - SNBRFinder for DNA and RNA binding prediction, http://ibi.hzau.edu.cn/SNBRFinder
 - GPS5.0 for PTM prediction, https://gps.biocuckoo.cn/
 
-# Additional Tutorial
+## Additional Tutorial
 - [hhsuit for HMM (Steinegger M. et al. BMC Bioinformatics, 2019)](https://github.com/soedinglab/hh-suite)
 - [scikit-learn (Pedregosa, F. et al. Journal of Machine Learning Research, 2011)](https://scikit-learn.org/stable/getting_started.html)
 
-# Datasets for Training
+## Datasets for Training
 - the phase separation proteins used to contruct PSPHunter are in ./datasets
 - 以训练好的模型存储在./train/里
 
-# Generate the features
+## Generate the features
 - 所有的feature产生的代码存放在scripts/featureExtraction, 包含序列特征和功能特征, 合并完成之后可用于模型的训练
 
-# demo of predict phase separation probility
+## demo of predict phase separation probility
 `cd Test`
 
 `perl scripts/Standalone/predict_proteinProb.pl Test`
 
 
-# Cite
+## Cite
 
 Cite our paper by
 
@@ -54,6 +54,6 @@ Cite our paper by
 
 http://psphunter.stemcellding.org  
 
-# Contact
+## Contact
 
 Please contact o.sj@live.com or raise an issue in the github repo with any questions about installation or usage. 
