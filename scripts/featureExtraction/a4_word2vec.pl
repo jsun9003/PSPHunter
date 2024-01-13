@@ -2,18 +2,18 @@ use warnings;
 use strict;
 
 my $abs_dir="/data1/juns/phase2/";
-my $choice="PhaSePredMix";
+my $choice="";
 my $clust=$ARGV[1];
 my $re=$ARGV[0];
 
 my $out_dir=$abs_dir."ML/scaffold/$choice"."_repeat"."$clust/$re/";
-my $fasta_dir="/data1/juns/PathHost/data_raw/fasta_pathhost/";
+my $fasta_dir="./data_raw/fasta/";
 
 #topo
 my %wv=();
 my $win="70";
 my $size="60";
-open(IN, "/data1/juns/word2v/uniprot_sprot"."$win"."_size$size.txt") or die "$!";
+open(IN, "./word2v/uniprot_sprot"."$win"."_size$size.txt") or die "$!";
 my $c=0;
 while (<IN>)
 {
