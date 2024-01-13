@@ -2,15 +2,12 @@ use warnings;
 use strict;
 
 my $abs_dir="/data1/juns/phase2/";
-my $choice="PhaSePredMix";
+my $choice="";
 my $clust=$ARGV[1];
 my $re=$ARGV[0];
 
 my $out_dir=$abs_dir."ML/scaffold/"."$choice"."_repeat"."$clust/$re/";
-my $data_dir="/data1/juns/PathHost/data_raw/";
-my $fasta_dir="/data1/juns/PathHost/data_raw/fasta_pathhost/";
-my $hhm_dir="/data1/juns/PathHost/data_raw/hhm_pathhost/";
-my $pssm_dir="/data1/juns/PathHost/data_raw/pssm_pathhost/";
+my $fasta_dir="./data_raw/fasta/";
 my %class=(
             "C"=>"1","W"=>"1","H"=>"1","M"=>"1","Y"=>"1","F"=>"1","I"=>"1","V"=>"1","A"=>"1","L"=>"1",
             "G"=>"2","P"=>"2",
