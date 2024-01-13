@@ -21,7 +21,7 @@
 
 ## Datasets for Training
 - Phase separation proteins used to construct PSPHunter are in the ./datasets folder.
-- Trained models are stored in the ./train/ directory.
+- Trained models, including Sequence-based model, word2vec-based model, and Merged Model, are stored in the ./train/ directory.
 
 ## Generate the features
 - Code for generating all features is located in scripts/featureExtraction, encompassing both sequence and functional features. The merged output can be used for model training.
