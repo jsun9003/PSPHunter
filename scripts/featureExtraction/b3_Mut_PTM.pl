@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 my $abs_dir="/data1/juns/phase2/";
-my $choice="PhaSePredMix";
+my $choice="";
 my $clust=$ARGV[1];
 my $re=$ARGV[0];
 
