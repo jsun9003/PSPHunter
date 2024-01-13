@@ -26,7 +26,7 @@
 ## Generate the features
 - Code for generating all features is located in scripts/featureExtraction, encompassing both sequence and functional features. The merged output can be used for model training.
 
-##We will demonstrate the usage of PSPHunter using its word2vec sub-model (The complete model is stored in the 'trained model' folder.)
+## We will demonstrate the usage of PSPHunter using its word2vec sub-model (The complete model is stored in the 'trained model' folder.)
 ## Demonstration of phase separation Probability Prediction
 `cd Test`
 
