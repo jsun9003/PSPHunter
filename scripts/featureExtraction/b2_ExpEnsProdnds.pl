@@ -2,12 +2,12 @@ use warnings;
 use strict;
 
 my $abs_dir="/data1/juns/phase2/";
-my $choice="PhaSePredMix";
+my $choice="";
 my $clust=$ARGV[1];
 my $re=$ARGV[0];
 
 my $out_dir=$abs_dir."ML/scaffold/$choice"."_repeat"."$clust/$re/";
-my $fea_dir="/data1/juns/PathHost/data_raw/";
+my $fea_dir="./data_raw/";
 #age
 my %age=();
 my $sum=0;
