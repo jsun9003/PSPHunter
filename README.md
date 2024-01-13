@@ -6,16 +6,41 @@
 
 ![figs/overview.jpg](https://github.com/jsun9003/PSPHunter/blob/main/figs/overview.jpg)
 
+# To generate the ensential features
+
+#### Please have the following softwares installed first:
+- psiblast for PSSM, https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+- hhsuit for remote homology detection, https://github.com/soedinglab/hh-suite
+- SPINE-D-local for Intrinsically disordered regions (IDRs) detection, http://zhouyq-lab.szbl.ac.cn/download/
+- SNBRFinder for DNA and RNA binding prediction, http://ibi.hzau.edu.cn/SNBRFinder
+- GPS5.0 for PTM prediction, https://gps.biocuckoo.cn/
+
+# Additional Tutorial
+- [hhsuit for HMM (Steinegger M. et al. BMC Bioinformatics, 2019)](https://github.com/soedinglab/hh-suite)
+- [scikit-learn (Pedregosa, F. et al. Journal of Machine Learning Research, 2011)](https://scikit-learn.org/stable/getting_started.html)
+
+# Datasets for Training
+- the phase separation proteins used to contruct PSPHunter are in ./datasets
+- 以训练好的模型存储在./train/里
+
+# Generate the features
+- 所有的feature产生的代码存放在scripts/featureExtraction, 包含序列特征和功能特征, 合并完成之后可用于模型的训练
+
+# demo of predict phase separation probility
+`cd Test`
+
+`perl scripts/Standalone/predict_proteinProb.pl Test`
+
 
 # Cite
 
 Cite our paper by
 
 ```
-@article {Sun2022multiscale,
+@article {Sun2024multiscale,
 	author = {Jun Sun, Jiale Qu and Cai Zhao},
-	title = {PSPHunter: A Machine Learning Model to Predict Phase Separation Driving Residues Enriching Pathogenic Mutations of Glycine and Proline},
-	year={2022},
+	title = {Precise prediction of phase-separation key residues by machine learning reveals the dysregulated landscape impacted by pathogenic mutations},
+	year={2024},
 	publisher = {Nature Publishing Group},
 	journal = {Under Submited}
 }
