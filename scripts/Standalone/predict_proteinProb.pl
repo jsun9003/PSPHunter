@@ -3,23 +3,9 @@ my ($id,$email)=@ARGV;
 #my $identi=0.3;
 
 my $home_dir="/home/PSPHunter/";
-my $dir="/var/www/psphunter.stemcellding.org/job/$id/";
+my $dir="./job/$id/";
 #my $dir="$home_dir"."catalytic/job/";
 my $progam_dir=$home_dir."scripts/";
-#my $data_raw="$home_dir"."catalytic/data_raw/";
-my $sendmail_file="/var/www/psphunter.stemcellding.org/sendmail.pl";
-my $sendmail_filetome="/var/www/psphunter.stemcellding.org/sendmailtome.pl";
-my $emailsend_file_check ="$dir"."emailcheck.txt";
-
-my $jsun_email="o.sj\@qq.com";
-my $own_flag=0;
-if (-e $emailsend_file_check)
-{
-    print "you will get an email latter;";
-    $own_flag++;
-}else{
-    system "/home/PSPHunter/software/miniconda3/bin/perl $sendmail_filetome $jsun_email $id 1";
-}
 
 my %wv=();
 open(IN, "$home_dir"."wordvec/uniprot_sprot70_size60.txt") or die "$!";
@@ -226,22 +212,10 @@ if ($proNo==1)
     close OUT; 
 }
 
-
-
-my $sendmail=$progam_dir."sendmail_myemail.py";
-
 open(DO,">$dir"."done_predictProProb.txt")||die"$!";
 foreach my $key(keys %done){
   print DO $key,",",$done{$key},"\n";
 }
 close DO;
-
-print $email,"\tEmail To\n";
-if (-e $emailsend_file_check)
-{
-    print "you will get an email latter;"
-}else{
-    system "/home/PSPHunter/software/miniconda3/bin/perl $sendmail_file $email $id 1";
-}
 
 system "rm -rf $fasta_dir";
