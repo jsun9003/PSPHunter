@@ -1,221 +1,255 @@
-#!/usr/bin/perl
-my ($id,$email)=@ARGV;
-#my $identi=0.3;
+#!/usr/bin/env perl
+use strict;
+use 5.010;
+use warnings;
 
-my $home_dir="/home/PSPHunter/";
-my $dir="./job/$id/";
-#my $dir="$home_dir"."catalytic/job/";
-my $progam_dir=$home_dir."scripts/";
+use Getopt::Long;
+use File::Basename;
+use IPC::Cmd qw[can_run run];
+use File::Temp qw/ tempfile tempdir /;
+use FindBin qw($Bin);
 
-my %wv=();
-open(IN, "$home_dir"."wordvec/uniprot_sprot70_size60.txt") or die "$!";
-while (<IN>)
-{
+use Cwd;
+
+#usage information
+my $usage = <<USAGE;
+Usage: predict_proteinProb.pl -i in.fa  -o outfile
+ Options:
+  -i    input fasta file, default STDIN
+  -o    output folder
+USAGE
+
+my $in_fasta   = '';
+my $out_folder = dirname './';
+die $usage
+  unless GetOptions(
+    "i:s" => \$in_fasta,
+    "o:s" => \$out_folder,
+  );
+
+#Enviment checking
+can_run('python')   or die 'python is not installed!';
+can_run('python')   or die 'python is not installed!';
+can_run('bedtools') or die 'bedtools is not installed!';
+my $progam_dir = $Bin . "../scripts/";
+
+my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
+die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
+
+my $test_fa_file = $Bin . "/../../datasets/testSun.fasta";
+die "Cannot dectect testing data set:$test_fa_file" unless -e $test_fa_file;
+
+my $train_wvc = $Bin . "/../../datasets/train/";
+die "Cannot dectect training data set:$train_wvc" unless -d $train_wvc;
+
+$out_folder =~ s/[\/|\|]+$//;
+mkdir $out_folder unless -d $out_folder;
+
+#############################################
+#input and output file initiation
+#############################################
+
+my $in_fasta_fh;
+if ( $in_fasta && $in_fasta ne '-' ) {
+    die "input fastafile does not exists\n" unless -e $in_fasta;
+    open $in_fasta_fh, "<", $in_fasta or die "cannot open file $in_fasta:$!\n";
+}
+else {
+    if (@ARGV) {
+        if ( $ARGV[0] eq '-' ) {
+            $in_fasta_fh = *STDIN;
+        }
+        elsif ( -e $ARGV[0] ) {
+            open $in_fasta_fh, "<", $ARGV[0]
+              or die "cannot open file $ARGV[0]:$!\n";
+        }
+        else {
+            die "$ARGV[0] does not exists\n";
+        }
+    }
+    else {
+        $in_fasta_fh = *STDIN;
+    }
+}
+
+my %wv = ();
+open my $wv_fh, "<", $wordvec_file or die "$!";
+while (<$wv_fh>) {
     chomp;
     next if /^Uniprot/;
-    my @item=split/\t/;
-    my @ref=@item[1..$#item];
-    $wv{$item[0]}=\@ref;
+    my @item = split /\t/;
+    my @ref  = @item[ 1 .. $#item ];
+    $wv{ $item[0] } = \@ref;
 }
-close IN;
+close $wv_fh;
 
 ####Split fasta into different truncations
-my $seq_fa=$dir."temp.fasta";
-my $fasta_dir=$dir."fasta1/";
+my $fasta_dir = $out_folder . "fasta1/";
 mkdir $fasta_dir;
 
-open(IN,"$seq_fa") or die "$!";
-chomp(my @fastas=<IN>);
-close IN;
+chomp( my @fastas = <$in_fasta_fh> );
+close $in_fasta_fh;
 
-my %fa=();
-my $pro="";
-my $flag=0;
-foreach my $fasta (@fastas)
-{
-    $fasta=~s/\r//g;
-    if ($fasta=~/^>(.*)/)
-    {
-        $pro=$1;
-        $pro=~s/\s+|\*|\.|\[|\]|\"|\||\(|\)|\=//g;
-        $pro=substr($pro,0,15);
-        open(OUT,">>$fasta_dir"."$pro.fasta") or die "$!";
-        print OUT ">",$pro,"\n";
+my %fa   = ();
+my $pro  = "";
+my $flag = 0;
+foreach my $fasta (@fastas) {
+    $fasta =~ s/\r//g;
+    if ( $fasta =~ /^>(.*)/ ) {
+        $pro = $1;
+        $pro =~ s/\s+|\*|\.|\[|\]|\"|\||\(|\)|\=//g;
+        $pro = substr( $pro, 0, 15 );
+        open my $pro_fh, ">>$fasta_dir" . "$pro.fasta" or die "$!";
+        print $pro_fh ">", $pro, "\n";
         $fa{$pro}++;
         $flag++;
-        close OUT;
-    }else{
-        open(OUT,">>$fasta_dir"."$pro.fasta") or die "$!";
-        $fasta=uc $fasta;
-        print OUT "$fasta";
-        close OUT;
+        close $pro_fh;
     }
-    
-}
-print scalar keys %fa,"\n";
-my $proNo=scalar keys %fa;
+    else {
+        open my $pro_fh, ">>$fasta_dir" . "$pro.fasta" or die "$!";
+        $fasta = uc $fasta;
+        print $pro_fh "$fasta";
+        close $pro_fh;
+    }
 
-my $o_dir=$dir."ML1/";
+}
+
+print scalar keys %fa, "\n";
+my $proNo = scalar keys %fa;
+
+my $o_dir = $out_folder . "ML1/";
 mkdir $o_dir;
 
-my $size=60;
+my $size = 60;
 
-if ($flag==0)
-{
-    $proNo=1;
+if ( $flag == 0 ) {
+    $proNo = 1;
     $fa{"query"}++;
-    open(OUT,">$fasta_dir"."query.fasta") or die "$!";
-    print OUT ">query\n";
-    foreach my $fasta (@fastas)
-    {
-        $fasta=uc $fasta;
-        print OUT "$fasta";
+    open my $query_fh, ">$fasta_dir" . "query.fasta" or die "$!";
+    print $query_fh ">query\n";
+    foreach my $fasta (@fastas) {
+        $fasta = uc $fasta;
+        print $query_fh "$fasta";
     }
-    close OUT;
+    close $query_fh;
 }
 
-
-if ($proNo == 1)
-{
+if ( $proNo == 1 ) {
     $fa{"testSun"}++;
-    my $seqtest="/var/www/psphunter.stemcellding.org/job/testSun.fasta";
-    system("cp $seqtest $fasta_dir");
-    open(OUT, ">$o_dir"."Intestinput.txt") or die "$!";
-    open(OU, ">$o_dir"."Intest.txt") or die "$!";
-    foreach my $uni (sort keys %fa)
-    {
-        my @fea=();
-        my @vec=();
-        my $bacfasta="$fasta_dir"."$uni.fasta";
-         if (!-s $bacfasta) {
-            print $bacfasta,"\t","no bac protein\n";
-            for(my $j=1;$j<=$size;$j++) 
-            {
-                push(@vec,0);
-            }
-        }else{
-            open(F,$bacfasta) or die "$!";
-            chomp(my @bacteria_seq=<F>);
-            close F;
-            my @aa=split//,$bacteria_seq[1];
-            for(my $i=0;$i<(scalar @aa)-2;$i++)
-            {
-                my $tri=$aa[$i].$aa[$i+1].$aa[$i+2];
-                if (exists $wv{$tri})
-                {
-                    my @tvec=@{$wv{$tri}};
-                    for(my $j=0;$j<@tvec;$j++)
-                    {
-                        $vec[$j]+=$tvec[$j];
-                    }
-                }
-                
+    system("cp $test_fa_file $fasta_dir");
+    open my $Intestinput_fh, ">", "$o_dir" . "Intestinput.txt" or die "$!";
+    open my $Intest_fh,      ">", "$o_dir" . "Intest.txt"      or die "$!";
+    foreach my $uni ( sort keys %fa ) {
+        my @fea      = ();
+        my @vec      = ();
+        my $bacfasta = "$fasta_dir" . "$uni.fasta";
+        if ( !-s $bacfasta ) {
+            print $bacfasta, "\t", "no bac protein\n";
+            for ( my $j = 1 ; $j <= $size ; $j++ ) {
+                push( @vec, 0 );
             }
         }
-        push(@fea,@vec);
-        print OUT "0\t",join "\t",@fea,"\n";
-        print OU "$uni\n";
-    }
-    close OUT;
-    close OU;
-}else{
-    open(OUT, ">$o_dir"."Intestinput.txt") or die "$!";
-    open(OU, ">$o_dir"."Intest.txt") or die "$!";
-    foreach my $uni (sort keys %fa)
-    {
-        my @fea=();
-        my @vec=();
-        my $bacfasta="$fasta_dir"."$uni.fasta";
-         if (!-s $bacfasta) {
-            print $bacfasta,"\t","no bac protein\n";
-            for(my $j=1;$j<=$size;$j++) 
-            {
-                push(@vec,0);
-            }
-        }else{
-            open(F,$bacfasta) or die "$!";
-            chomp(my @bacteria_seq=<F>);
-            close F;
-            my @aa=split//,$bacteria_seq[1];
-            for(my $i=0;$i<(scalar @aa)-2;$i++)
-            {
-                my $tri=$aa[$i].$aa[$i+1].$aa[$i+2];
-                if (exists $wv{$tri})
-                {
-                    my @tvec=@{$wv{$tri}};
-                    for(my $j=0;$j<@tvec;$j++)
-                    {
-                        $vec[$j]+=$tvec[$j];
+        else {
+            open my $tmp_fh, $bacfasta or die "$!";
+            chomp( my @bacteria_seq = <$tmp_fh> );
+            close $tmp_fh;
+            my @aa = split //, $bacteria_seq[1];
+            for ( my $i = 0 ; $i < ( scalar @aa ) - 2 ; $i++ ) {
+                my $tri = $aa[$i] . $aa[ $i + 1 ] . $aa[ $i + 2 ];
+                if ( exists $wv{$tri} ) {
+                    my @tvec = @{ $wv{$tri} };
+                    for ( my $j = 0 ; $j < @tvec ; $j++ ) {
+                        $vec[$j] += $tvec[$j];
                     }
                 }
-                
+
             }
         }
-        push(@fea,@vec);
-        print OUT "0\t",join "\t",@fea,"\n";
-        print OU "$uni\n";
+        push( @fea, @vec );
+        print $Intestinput_fh "0\t", join "\t", @fea, "\n";
+        print $Intest_fh "$uni\n";
     }
-    close OUT;
-    close OU;
+    close $Intestinput_fh;
+    close $Intest_fh;
+}
+else {
+    open my $Intestinput_fh, ">", "$o_dir" . "Intestinput.txt" or die "$!";
+    open my $Intest_fh,      ">", "$o_dir" . "Intest.txt"      or die "$!";
+    foreach my $uni ( sort keys %fa ) {
+        my @fea      = ();
+        my @vec      = ();
+        my $bacfasta = "$fasta_dir" . "$uni.fasta";
+        if ( !-s $bacfasta ) {
+            print $bacfasta, "\t", "no bac protein\n";
+            for ( my $j = 1 ; $j <= $size ; $j++ ) {
+                push( @vec, 0 );
+            }
+        }
+        else {
+            open my $tmp_fh, $bacfasta or die "$!";
+            chomp( my @bacteria_seq = <$tmp_fh> );
+            close $tmp_fh;
+            my @aa = split //, $bacteria_seq[1];
+            for ( my $i = 0 ; $i < ( scalar @aa ) - 2 ; $i++ ) {
+                my $tri = $aa[$i] . $aa[ $i + 1 ] . $aa[ $i + 2 ];
+                if ( exists $wv{$tri} ) {
+                    my @tvec = @{ $wv{$tri} };
+                    for ( my $j = 0 ; $j < @tvec ; $j++ ) {
+                        $vec[$j] += $tvec[$j];
+                    }
+                }
+
+            }
+        }
+        push( @fea, @vec );
+        print $Intestinput_fh "0\t", join "\t", @fea, "\n";
+        print $Intest_fh "$uni\n";
+    }
+    close $Intestinput_fh;
+    close $Intest_fh;
 }
 
-my $python=$progam_dir."Intest-apply-test.py";
-for (my $re=1;$re<=100;$re++)
-{
-    my $f1_dir=$home_dir."/train/$re/word2vec70_60/";
-    my $f2_dir=$o_dir;
-    system "/home/PSPHunter/software/miniconda3/bin/python $python $f1_dir $f2_dir $re";
+for ( my $re = 1 ; $re <= 100 ; $re++ ) {
+    my $f1_dir = "$train_wvc/$re/word2vec70_60/";
+    my $f2_dir = $o_dir;
+    system "python $Bin/Intest-apply-test.py $f1_dir $f2_dir $re";
 }
 
-my $n=0;
-my %name=();
-open(IN,"$o_dir"."Intest.txt") or die "$!";
-while (<IN>)
-{
+my $n    = 0;
+my %name = ();
+open my $Intest_fh, "$o_dir" . "Intest.txt" or die "$!";
+while (<$Intest_fh>) {
     chomp;
     $n++;
-    $name{$n}=$_;
+    $name{$n} = $_;
 }
-close IN;
+close $Intest_fh;
 
-my %prob=();
-for (my $re=1;$re<=100;$re++)
-{
-    open(IN,"$o_dir"."InProbphase$re.txt") or die "$!";
-    my $m=0;
-    while (<IN>)
-    {
+my %prob = ();
+for ( my $re = 1 ; $re <= 100 ; $re++ ) {
+    open my $tmp_fh, "$o_dir" . "InProbphase$re.txt" or die "$!";
+    my $m = 0;
+    while (<$tmp_fh>) {
         chomp;
         $m++;
-        $prob{$m}+=$_;
+        $prob{$m} += $_;
     }
-    close IN;
+    close $tmp_fh;
 }
 
-if ($proNo==1)
-{
-    open(OUT,">$dir"."Avg.txt") or die "$!";
-    print OUT "ProteinName\tProb\n";
-    foreach my $name (sort {$a<=>$b} keys %name)
-    {
+open my $avg_fh, ">", "$out_folder" . "Avg.txt" or die "$!";
+print $avg_fh "ProteinName\tProb\n";
+if ( $proNo == 1 ) {
+    foreach my $name ( sort { $a <=> $b } keys %name ) {
         next if $name{$name} eq "testSun";
-        print OUT $name{$name},"\t",$prob{$name}/100,"\n";
+        print $avg_fh $name{$name}, "\t", $prob{$name} / 100, "\n";
     }
-    close OUT; 
-}else{
-    open(OUT,">$dir"."Avg.txt") or die "$!";
-    print OUT "ProteinName\tProb\n";
-    foreach my $name (sort {$a<=>$b} keys %name)
-    {
-        print OUT $name{$name},"\t",$prob{$name}/100,"\n";
+}
+else {
+    foreach my $name ( sort { $a <=> $b } keys %name ) {
+        print $avg_fh $name{$name}, "\t", $prob{$name} / 100, "\n";
     }
-    close OUT; 
 }
-
-open(DO,">$dir"."done_predictProProb.txt")||die"$!";
-foreach my $key(keys %done){
-  print DO $key,",",$done{$key},"\n";
-}
-close DO;
+close $avg_fh;
 
 system "rm -rf $fasta_dir";
