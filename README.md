@@ -30,17 +30,17 @@
 ## Demonstration of phase separation Probability Prediction
 `cd Test`
 
-`perl scripts/Standalone/predict_proteinProb.pl Test`
+`perl ../scripts/Standalone/predict_proteinProb.pl -i seq.fasta`
 
 ## Demonstration of phase separation driving residue Prediction
 `cd Test`
 
-`perl scripts/Standalone/predict_DrivingRegion.pl Test`
+`perl ../scripts/Standalone/predict_DrivingRegion.pl -i seq.fasta -o outfile`
 
 ## Demonstration of phase separation mutation effect Prediction
 `cd Test`
 
-`perl scripts/Standalone/predict_MutationEffect.pl Test`
+`perl ../scripts/Standalone/predict_MutationEffect.pl -i seq.fasta -o outfile`
 
 
 ## Availability
