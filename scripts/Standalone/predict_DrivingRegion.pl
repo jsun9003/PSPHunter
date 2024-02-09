@@ -8,7 +8,7 @@ use File::Basename;
 use IPC::Cmd qw[can_run run];
 use File::Temp qw/ tempfile tempdir /;
 use FindBin qw($Bin);
-
+use Data::Printer;
 use Cwd;
 
 #usage information
@@ -16,14 +16,17 @@ my $usage = <<USAGE;
 Usage: predict_DrivingRegion.pl -i in.fa  -o outfile
  Options:
   -i    input fasta file, default STDIN
-  -o    output fasta file, default STDOUT
+  -t    truncated-unit value of amino acids , default 20
+  -o    output Driving Region file, default STDOUT
 USAGE
 
 my $in_fasta = '';
 my $outfile  = '';
+my $bin_size = 20;
 die $usage
   unless GetOptions(
     "i:s" => \$in_fasta,
+    "t:i" => \$bin_size,
     "o:s" => \$outfile,
   );
 
@@ -31,13 +34,12 @@ die $usage
 can_run('python')   or die 'python is not installed!';
 can_run('sort')     or die 'sort is not installed!';
 can_run('bedtools') or die 'bedtools is not installed!';
-my $progam_dir  = $Bin . "../scripts/";
 my $working_dir = getcwd;
 
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
 die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
 
-my $train_wvc = $Bin . "/../../datasets/train/";
+my $train_wvc = $Bin . "/../../Trained_model/";
 die "Cannot dectect training data set:$train_wvc" unless -d $train_wvc;
 
 #############################################
@@ -78,47 +80,45 @@ else {
 ####################################################
 #Read fasta files and store to hash %seqs
 ####################################################
-# my %seqs = ();
-my %seqs;
+my %seqs = ();
 warn "Reading fasta file...\n";
+my $seq_id = "";
 while (<$in_fasta_fh>) {
-    s/\r?\n//;
-    my $id = "";
-    if (/^(>.*?)\s/) {
-        $id = $1;
-        warn "\tReading $id...\n";
-        if ( exists $seqs{$id} ) {
-            warn "duplicated squence id:$id";
+    s/\r?\n//g;
+    if (/^>/) {
+        ($seq_id, ) = split /\s/;
+		$seq_id =~ s/^>//;
+        warn "\tReading sequence $seq_id...\n";
+        if ( exists $seqs{$seq_id} ) {
+            warn "duplicated squence id:$seq_id";
         }
-        $seqs{$id} = '';
-    }
-    elsif (/^\s*$/) {
-
+        $seqs{$seq_id} = '';
+    }else{
         #preprocess sequence
-        s/\n|\r|\s//g;
         s/-|\*//g;
-        $seqs{$id} .= uc $_;
+        $seqs{$seq_id} .= uc $_;
     }
 }
+
+
 
 ####################################################
 #Interate Each Sequence
 ####################################################
 foreach my $id ( keys %seqs ) {
-    warn "Processing sequencing $id\n";
+    warn "Processing sequence $id\n";
 
     my $seq = $seqs{$id};
     my $len = length $seq;
-
     ####Split fasta into different truncations
 
     my $fasta_dir = "tmp.$id.fasta/";
     mkdir $fasta_dir;
 
-    my $frag = "20";
+    my $bin_size = "20";
     my @list = ();
-    for ( my $i = 0 ; $i < $len - $frag + 1 ; $i++ ) {
-        my $new  = substr( $seq, 0, $i ) . substr( $seq, $i + $frag );
+    for ( my $i = 0 ; $i < $len - $bin_size + 1 ; $i++ ) {
+        my $new  = substr( $seq, 0, $i ) . substr( $seq, $i + $bin_size );
         my $temp = "query" . "_$i";
         push( @list, $temp );
         open my $fasta_fh, ">$fasta_dir" . "$temp.fasta" or die "$!";
@@ -211,10 +211,11 @@ foreach my $id ( keys %seqs ) {
 
     open my $inprob_avg_fh, ">", "$o_dir" . "InProbAVG.txt" or die "$!";
     my %hash = ();
+	
     for ( my $i = 1 ; $i <= 100 ; $i++ ) {
         open my $tmp_fh, "$o_dir" . "InProbphase$i.txt" or die "$!";
         my $k = 0;
-        while (<IN>) {
+        while (<$tmp_fh>) {
             chomp;
             $k++;
             if ( exists $hash{$k} ) {
@@ -239,7 +240,7 @@ foreach my $id ( keys %seqs ) {
     my @prob = ();
 
     %hash = ();
-    while (<IN>) {
+    while (<$inprob_avg_fh>) {
         chomp;
         my ( $index, $score ) = split;
         push( @prob, $score );
