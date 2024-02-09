@@ -16,7 +16,7 @@ my $usage = <<USAGE;
 Usage: predict_MutationEffect.pl -i in.fa  -o outfile
  Options:
   -i    input fasta file, default STDIN
-  -o    output fasta file, default STDOUT
+  -o    output file, default STDOUT
 USAGE
 
 my $in_fasta = '';
@@ -29,13 +29,12 @@ die $usage
 
 #Enviment checking
 can_run('python') or die 'python is not installed!';
-my $progam_dir  = $Bin . "../scripts/";
 my $working_dir = getcwd;
 
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
 die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
 
-my $train_wvc = $Bin . "/../../datasets/train/";
+my $train_wvc = $Bin . "/../../Trained_model/";
 die "Cannot dectect training data set:$train_wvc" unless -d $train_wvc;
 
 my @aa = qw(C W H M Y F I V A L G P S Q T N E R K D);
@@ -78,28 +77,26 @@ else {
 ####################################################
 #Read fasta files and store to hash %seqs
 ####################################################
-# my %seqs = ();
-my %seqs;
+my %seqs = ();
 warn "Reading fasta file...\n";
+my $seq_id = "";
 while (<$in_fasta_fh>) {
-    s/\r?\n//;
-    my $id = "";
-    if (/^(>.*?)\s/) {
-        $id = $1;
-        warn "\tReading $id...\n";
-        if ( exists $seqs{$id} ) {
-            warn "duplicated squence id:$id";
+    s/\r?\n//g;
+    if (/^>/) {
+        ($seq_id, ) = split /\s/;
+		$seq_id =~ s/^>//;
+        warn "\tReading sequence $seq_id...\n";
+        if ( exists $seqs{$seq_id} ) {
+            warn "duplicated squence id:$seq_id";
         }
-        $seqs{$id} = '';
-    }
-    elsif (/^\s*$/) {
-
+        $seqs{$seq_id} = '';
+    }else{
         #preprocess sequence
-        s/\n|\r|\s//g;
         s/-|\*//g;
-        $seqs{$id} .= uc $_;
+        $seqs{$seq_id} .= uc $_;
     }
 }
+
 
 ####################################################
 #Interate Each Sequence
@@ -221,7 +218,7 @@ foreach my $id ( keys %seqs ) {
 
     close $ml_out_fh;
 
-    open my $inprob_avg_fh, ">", "$working_dir/$id/InProbAVG.txt" or die "$!";
+    open my $inprob_avg_fh, ">", "$working_dir/$id.InProbAVG.txt" or die "$!";
     my %hash = ();
     for ( my $i = 1 ; $i <= 100 ; $i++ ) {
         open my $in_prob_phase_fh, "<", "$o_dir" . "InProbphase$i.txt"
