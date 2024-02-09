@@ -31,7 +31,6 @@ die $usage
 can_run('python')   or die 'python is not installed!';
 can_run('python')   or die 'python is not installed!';
 can_run('bedtools') or die 'bedtools is not installed!';
-my $progam_dir = $Bin . "../scripts/";
 
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
 die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
@@ -39,7 +38,7 @@ die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
 my $test_fa_file = $Bin . "/../../datasets/testSun.fasta";
 die "Cannot dectect testing data set:$test_fa_file" unless -e $test_fa_file;
 
-my $train_wvc = $Bin . "/../../datasets/train/";
+my $train_wvc = $Bin . "/../../Trained_model/";
 die "Cannot dectect training data set:$train_wvc" unless -d $train_wvc;
 
 $out_folder =~ s/[\/|\|]+$//;
