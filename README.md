@@ -51,13 +51,7 @@
 Cite our paper by
 
 ```
-@article {Sun2024multiscale,
-	author = {Jun Sun, Jiale Qu and Cai Zhao},
-	title = {Precise prediction of phase-separation key residues by machine learning reveals the dysregulated landscape impacted by pathogenic mutations},
-	year={2024},
-	publisher = {Nature Publishing Group},
-	journal = {Under Submited}
-}
+Sun, J., Qu, J., Zhao, C. et al. Precise prediction of phase-separation key residues by machine learning. Nature Communications 15, 2662 (2024). https://doi.org/10.1038/s41467-024-46901-9 （IF: 16.6)
 ```
 
 ![figs/graphAbstract.jpg](https://github.com/jsun9003/PSPHunter/blob/main/figs/graphAbstract.jpg)
