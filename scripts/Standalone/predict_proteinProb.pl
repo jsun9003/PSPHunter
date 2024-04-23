@@ -15,10 +15,10 @@ use Cwd;
 my $usage = <<USAGE;
 Usage: predict_proteinProb.pl -i in.fa  -o outfile
  Options:
-  -i    input fasta file, default STDIN
+  -i    input fasta file, default STDIN. This can be a file with multiple headers. Must be protein.
   -o    output folder
 USAGE
-
+# TODO add option to keep intermediate files
 my $in_fasta   = '';
 my $out_folder = dirname './';
 die $usage
@@ -31,6 +31,7 @@ die $usage
 can_run('python')   or die 'python is not installed!';
 can_run('python')   or die 'python is not installed!';
 can_run('bedtools') or die 'bedtools is not installed!';
+
 
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
 die "Cannot detect wordvec_file:$wordvec_file" unless -e $wordvec_file;
@@ -83,8 +84,9 @@ while (<$wv_fh>) {
 close $wv_fh;
 
 ####Split fasta into different truncations
-my $fasta_dir = $out_folder . "fasta1/";
+my $fasta_dir = $out_folder . "/fasta/";
 mkdir $fasta_dir;
+print "making output folder $fasta_dir";
 
 chomp( my @fastas = <$in_fasta_fh> );
 close $in_fasta_fh;
@@ -116,7 +118,7 @@ foreach my $fasta (@fastas) {
 print scalar keys %fa, "\n";
 my $proNo = scalar keys %fa;
 
-my $o_dir = $out_folder . "ML1/";
+my $o_dir = $out_folder . "/ML/";
 mkdir $o_dir;
 
 my $size = 60;
@@ -138,6 +140,7 @@ if ( $flag == 0 ) {
 if ( $proNo == 1 ) {
     $fa{"testSun"}++;
     system("cp $test_fa_file $fasta_dir");
+    # the exit code that prints comes from here I think
     open my $Intestinput_fh, ">", "$o_dir" . "Intestinput.txt" or die "$!";
     open my $Intest_fh,      ">", "$o_dir" . "Intest.txt"      or die "$!";
     foreach my $uni ( sort keys %fa ) {
@@ -210,11 +213,13 @@ else {
     close $Intest_fh;
 }
 
+# We predict 100 models
 for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     my $f1_dir = "$train_wvc/$re/word2vec70_60/";
     my $f2_dir = $o_dir;
     # here the python stuff happens...
     system "python $Bin/Intest-apply-test.py $f1_dir $f2_dir $re";
+    # print "the Intest number $re is done... \n"
 }
 
 my $n    = 0;
@@ -239,6 +244,8 @@ for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     close $tmp_fh;
 }
 
+
+# Here we write the output summary
 open my $avg_fh, ">", "$out_folder" . "Avg.txt" or die "$!";
 print $avg_fh "ProteinName\tProb\n";
 if ( $proNo == 1 ) {
@@ -253,5 +260,5 @@ else {
     }
 }
 close $avg_fh;
-
+# l'heur d'amature... that is quite dangerous...
 system "rm -rf $fasta_dir";
