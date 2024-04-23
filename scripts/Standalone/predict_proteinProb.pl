@@ -127,12 +127,14 @@ if ( $flag == 0 ) {
     open my $query_fh, ">$fasta_dir" . "query.fasta" or die "$!";
     print $query_fh ">query\n";
     foreach my $fasta (@fastas) {
+        # Make the fasta uppercase
         $fasta = uc $fasta;
         print $query_fh "$fasta";
     }
     close $query_fh;
 }
 
+# Suddenly here we have the test input
 if ( $proNo == 1 ) {
     $fa{"testSun"}++;
     system("cp $test_fa_file $fasta_dir");
@@ -211,6 +213,7 @@ else {
 for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     my $f1_dir = "$train_wvc/$re/word2vec70_60/";
     my $f2_dir = $o_dir;
+    # here the python stuff happens...
     system "python $Bin/Intest-apply-test.py $f1_dir $f2_dir $re";
 }
 

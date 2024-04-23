@@ -158,7 +158,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/rpds-py-0.18.0-py310hcb5633a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/rsa-4.9-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.1-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/linux-64/scikit-learn-1.4.2-py310h1fdf081_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/scikit-learn-1.2.0-py310h209a8ca_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/scipy-1.13.0-py310hb13e2d6_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-69.5.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/setuptools-scm-8.0.4-pyhd8ed1ab_1.conda
@@ -2777,26 +2777,26 @@ packages:
   timestamp: 1710497407653
 - kind: conda
   name: scikit-learn
-  version: 1.4.2
-  build: py310h1fdf081_0
+  version: 1.2.0
+  build: py310h209a8ca_0
   subdir: linux-64
-  url: https://conda.anaconda.org/conda-forge/linux-64/scikit-learn-1.4.2-py310h1fdf081_0.conda
-  sha256: 2a0236a275ddb8a8fbc7141b3d1d18b02eff33cf3ad2343cf201f43d884ae91d
-  md5: e6366971f5be0c52c003de2f5b49e633
+  url: https://conda.anaconda.org/conda-forge/linux-64/scikit-learn-1.2.0-py310h209a8ca_0.conda
+  sha256: 00733203bf459b9ca33b8c19ba7a57fca460aa266a6d98a5b111e8b199ed896d
+  md5: 5a08a1f004445ee9bf58261feb16cc18
   depends:
-  - _openmp_mutex >=4.5
-  - joblib >=1.2.0
+  - joblib >=1.1.1
+  - libcblas >=3.9.0,<4.0a0
   - libgcc-ng >=12
   - libstdcxx-ng >=12
-  - numpy >=1.22.4,<2.0a0
+  - numpy >=1.21.6,<2.0a0
   - python >=3.10,<3.11.0a0
   - python_abi 3.10.* *_cp310
   - scipy
   - threadpoolctl >=2.0.0
   license: BSD-3-Clause
   license_family: BSD
-  size: 9163298
-  timestamp: 1712825088172
+  size: 7497624
+  timestamp: 1670523623939
 - kind: conda
   name: scipy
   version: 1.13.0
