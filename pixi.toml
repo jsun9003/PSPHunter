@@ -1,0 +1,16 @@
+[project]
+name = "psphunter"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["Sibbe Bakker <sibbe.bakker@wur.nl>"]
+channels = ["conda-forge", "bioconda"]
+platforms = ["linux-64"]
+
+[tasks]
+predict = "perl scripts/Standalone/predict_proteinProb.pl xargs"
+
+[dependencies]
+perl = ">=5.32.1,<5.33"
+bedtools = ">=2.31.1,<2.32"
+scikit-learn = ">=1.4.2,<1.5"
+python = ">=3.12.3,<3.13"

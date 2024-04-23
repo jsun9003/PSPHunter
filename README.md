@@ -1,6 +1,18 @@
 
 # PSPHunter: A Machine Learning Model to Predict Phase Separation Driving Residues
 
+A fork made by Sibbe Bakker to clear the dependencies. Start the installation
+of the dependencies using
+```bash
+pixi install
+```
+then start the prediction on your fasta
+
+```bash
+pixi run predict -i fasta.fa
+```
+
+
 <div style="text-align: justify"> Dissecting the functions and the regulatory mechanisms of intracellular phase separation is fundamental to understanding transcriptional control, cell fate transition and disease development. However, the driving residues, which impact phase separation the most and therefore is the key for the functional study of protein phase separation, remain largely undisclosed. We developed PSPHunter, a machine learning method for predicting driving residues in phase-separating proteins. Validation through in vivo and in vitro methods, including FRAP and saturation measurements, confirms PSPHunter's accuracy. Applying PSPHunter, we demonstrate that truncating just 6 driving residues in SOX2 and GATA3 significantly disrupts their phase separation properties. Furthermore, PSPHunter identified nearly 80% of the phase-separating proteins associated with diseases. Remarkably, frequently mutated pathological residues (glycine and proline) tend to localize within driving residues, exerting a significant influence on phase separation. PSPHunter thus emerges as a crucial tool to uncover driving residues, facilitating insights into phase separation mechanisms governing transcriptional control, cell fate transitions, and disease development. </div>
 --------------------------
 
