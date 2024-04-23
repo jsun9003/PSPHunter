@@ -1,4 +1,6 @@
 .ML1/
+.dependencies
+.snakemake
 .fasta*
 *.swp
 .pixi/
