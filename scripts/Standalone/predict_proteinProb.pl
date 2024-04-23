@@ -15,23 +15,33 @@ use Cwd;
 my $usage = <<USAGE;
 Usage: predict_proteinProb.pl -i in.fa  -o outfile
  Options:
-  -i    input fasta file, default STDIN. This can be a file with multiple headers. Must be protein.
-  -o    output folder
+  -i        input fasta file, default STDIN. This can be a file with multiple headers. Must be protein.
+  -o        output folder
+  --verbose print extra output for diagnostic goals
 USAGE
 # TODO add option to keep intermediate files
 my $in_fasta   = '';
 my $out_folder = dirname './';
+my $verbose = 0;
 die $usage
   unless GetOptions(
     "i:s" => \$in_fasta,
     "o:s" => \$out_folder,
+    'verbose' => \$verbose,
   );
-
 #Environment checking
 can_run('python')   or die 'python is not installed!';
 can_run('python')   or die 'python is not installed!';
 can_run('bedtools') or die 'bedtools is not installed!';
 
+sub print_if_verbose {
+    my ($print_string, $verboseness) = @_;
+    if ($verboseness) {
+        print "$print_string";
+    }
+}
+
+print_if_verbose("verboseness $verbose", $verbose);
 
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
 die "Cannot detect wordvec_file:$wordvec_file" unless -e $wordvec_file;
@@ -86,7 +96,7 @@ close $wv_fh;
 ####Split fasta into different truncations
 my $fasta_dir = $out_folder . "/fasta/";
 mkdir $fasta_dir;
-print "making output folder $fasta_dir";
+print_if_verbose("making output folder $fasta_dir", $verbose);
 
 chomp( my @fastas = <$in_fasta_fh> );
 close $in_fasta_fh;
@@ -219,7 +229,7 @@ for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     my $f2_dir = $o_dir;
     # here the python stuff happens...
     system "python $Bin/Intest-apply-test.py $f1_dir $f2_dir $re";
-    # print "the Intest number $re is done... \n"
+    print_if_verbose("the Intest number $re is done... \n", $verbose);
 }
 
 my $n    = 0;
