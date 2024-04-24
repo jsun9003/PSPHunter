@@ -18,12 +18,5 @@ hhsuite = ">=3.3.0,<3.4"
 wget = ">=1.21.4,<1.22"
 gzip = ">=1.13,<2"
 tar = ">=1.34,<2"
-snakemake = ">=7.32.4,<7.33"
 joblib = ">=1.4.0,<1.5"
 
-[feature.d_spine_local.dependencies]
-perl = ">=5.32.1,<5.33"
-"2.7.18" = "*"
-python = ">=3.12.3,<3.13"
-blast = ">=2.15.0,<2.16"
-fortran = "*"
