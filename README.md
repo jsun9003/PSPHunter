@@ -7,6 +7,10 @@ A fork made by Sibbe Bakker to clear the dependencies. Start the installation
 of the dependencies using
 
 ```bash
+# git clone git@github.com:Luke-ebbis/PSPHunter.git
+# install pixi
+curl -fsSL https://pixi.sh/install.sh | bash
+# setup the pixi environment
 pixi install
 ```
 then start the prediction on your fasta
