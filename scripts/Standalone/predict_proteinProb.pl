@@ -15,31 +15,42 @@ use Cwd;
 my $usage = <<USAGE;
 Usage: predict_proteinProb.pl -i in.fa  -o outfile
  Options:
-  -i    input fasta file, default STDIN
-  -o    output folder
+  -i        input fasta file, default STDIN. This can be a file with multiple headers. Must be protein.
+  -o        output folder
+  --verbose print extra output for diagnostic goals
 USAGE
-
+# TODO add option to keep intermediate files
 my $in_fasta   = '';
 my $out_folder = dirname './';
+my $verbose = 0;
 die $usage
   unless GetOptions(
     "i:s" => \$in_fasta,
     "o:s" => \$out_folder,
+    'verbose' => \$verbose,
   );
-
-#Enviment checking
+#Environment checking
 can_run('python')   or die 'python is not installed!';
 can_run('python')   or die 'python is not installed!';
 can_run('bedtools') or die 'bedtools is not installed!';
 
+sub print_if_verbose {
+    my ($print_string, $verboseness) = @_;
+    if ($verboseness) {
+        print "$print_string";
+    }
+}
+
+print_if_verbose("verboseness $verbose", $verbose);
+
 my $wordvec_file = $Bin . "/../../datasets/wordvec/uniprot_sprot70_size60.txt";
-die "Cannot dectect wordvec_file:$wordvec_file" unless -e $wordvec_file;
+die "Cannot detect wordvec_file:$wordvec_file" unless -e $wordvec_file;
 
 my $test_fa_file = $Bin . "/../../datasets/testSun.fasta";
-die "Cannot dectect testing data set:$test_fa_file" unless -e $test_fa_file;
+die "Cannot detect testing data set:$test_fa_file" unless -e $test_fa_file;
 
 my $train_wvc = $Bin . "/../../Trained_model/";
-die "Cannot dectect training data set:$train_wvc" unless -d $train_wvc;
+die "Cannot detect training data set:$train_wvc" unless -d $train_wvc;
 
 $out_folder =~ s/[\/|\|]+$//;
 mkdir $out_folder unless -d $out_folder;
@@ -83,8 +94,9 @@ while (<$wv_fh>) {
 close $wv_fh;
 
 ####Split fasta into different truncations
-my $fasta_dir = $out_folder . "fasta1/";
+my $fasta_dir = $out_folder . "/fasta/";
 mkdir $fasta_dir;
+print_if_verbose("making output folder $fasta_dir", $verbose);
 
 chomp( my @fastas = <$in_fasta_fh> );
 close $in_fasta_fh;
@@ -116,7 +128,7 @@ foreach my $fasta (@fastas) {
 print scalar keys %fa, "\n";
 my $proNo = scalar keys %fa;
 
-my $o_dir = $out_folder . "ML1/";
+my $o_dir = $out_folder . "/ML/";
 mkdir $o_dir;
 
 my $size = 60;
@@ -127,15 +139,18 @@ if ( $flag == 0 ) {
     open my $query_fh, ">$fasta_dir" . "query.fasta" or die "$!";
     print $query_fh ">query\n";
     foreach my $fasta (@fastas) {
+        # Make the fasta uppercase
         $fasta = uc $fasta;
         print $query_fh "$fasta";
     }
     close $query_fh;
 }
 
+# Suddenly here we have the test input
 if ( $proNo == 1 ) {
     $fa{"testSun"}++;
     system("cp $test_fa_file $fasta_dir");
+    # the exit code that prints comes from here I think
     open my $Intestinput_fh, ">", "$o_dir" . "Intestinput.txt" or die "$!";
     open my $Intest_fh,      ">", "$o_dir" . "Intest.txt"      or die "$!";
     foreach my $uni ( sort keys %fa ) {
@@ -208,10 +223,13 @@ else {
     close $Intest_fh;
 }
 
+# We predict 100 models
 for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     my $f1_dir = "$train_wvc/$re/word2vec70_60/";
     my $f2_dir = $o_dir;
+    # here the python stuff happens...
     system "python $Bin/Intest-apply-test.py $f1_dir $f2_dir $re";
+    print_if_verbose("the Intest number $re is done... \n", $verbose);
 }
 
 my $n    = 0;
@@ -236,6 +254,8 @@ for ( my $re = 1 ; $re <= 100 ; $re++ ) {
     close $tmp_fh;
 }
 
+
+# Here we write the output summary
 open my $avg_fh, ">", "$out_folder" . "Avg.txt" or die "$!";
 print $avg_fh "ProteinName\tProb\n";
 if ( $proNo == 1 ) {
@@ -250,5 +270,5 @@ else {
     }
 }
 close $avg_fh;
-
+# l'heur d'amature... that is quite dangerous...
 system "rm -rf $fasta_dir";
